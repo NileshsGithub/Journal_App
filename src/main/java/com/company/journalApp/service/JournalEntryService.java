@@ -3,7 +3,6 @@ package com.company.journalApp.service;
 import com.company.journalApp.entity.JournalEntry;
 import com.company.journalApp.entity.User;
 import com.company.journalApp.repository.JournalEntryRepository;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,10 +22,11 @@ public class JournalEntryService    {
 
 
     @Transactional
-    public void saveEntry(JournalEntry journalEntry, String userName){
+    public void createJournalEntry(JournalEntry journalEntry, String userName){
         try {
             User user = userService.findByUserName(userName);
             journalEntry.setDate(LocalDateTime.now());
+            journalEntry.setUser(user);
             JournalEntry saved = journalEntryRepository.save(journalEntry);
             user.getJournalEntries().add(saved);
             userService.saveUser(user);
@@ -37,7 +37,7 @@ public class JournalEntryService    {
         }
     }
 
-    public void saveEntry(JournalEntry journalEntry){
+    public void createJournalEntry(JournalEntry journalEntry){
         journalEntryRepository.save(journalEntry);
     }
 
@@ -45,12 +45,12 @@ public class JournalEntryService    {
         return journalEntryRepository.findAll();
     }
 
-    public Optional<JournalEntry> findById(ObjectId id){
+    public Optional<JournalEntry> findById(Long id){
     return journalEntryRepository.findById(id);
     }
 
     @Transactional
-    public boolean deleteById(ObjectId id, String userName){
+    public boolean deleteById(Long id, String userName){
         boolean removed = false;
         try {
             User user = userService.findByUserName(userName);

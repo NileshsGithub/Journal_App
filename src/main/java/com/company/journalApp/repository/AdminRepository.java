@@ -4,9 +4,7 @@ import com.company.journalApp.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 
-public interface UserRepository extends JpaRepository<User, Long> {
-    User findByUserName(String userName);
+public interface AdminRepository extends JpaRepository<User, Long> {
 
-    void deleteByUserName(String userName);
 
 }

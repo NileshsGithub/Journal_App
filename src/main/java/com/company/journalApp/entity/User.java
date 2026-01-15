@@ -1,36 +1,33 @@
 package com.company.journalApp.entity;
 
+import jakarta.persistence.*;
 import lombok.Data;
-import lombok.NonNull;
-import org.bson.types.ObjectId;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-
-@Document(collection = "users")
+@Entity
+@Table(name = "users")
 @Data
-public class  User {
+@NoArgsConstructor
+public class User {
 
     @Id
-    private ObjectId id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long userId;
 
-    @Indexed(unique = true)
-    @NonNull
+    @Column(name = "username", nullable = false, unique = true)
     private String userName;
 
-    @NonNull
+    @Column(nullable = false)
     private String password;
 
-    @DBRef
-    List <JournalEntry> journalEntries = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<JournalEntry> journalEntries = new ArrayList<>();
 
-    private List<String> roles;
-
-
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role")
+    private List<String> roles = new ArrayList<>();
 }

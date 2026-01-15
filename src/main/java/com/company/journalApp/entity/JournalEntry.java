@@ -1,24 +1,32 @@
 package com.company.journalApp.entity;
 
+import jakarta.persistence.*;
 import lombok.*;
-import org.bson.types.ObjectId;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.time.LocalDateTime;
 
 
-@Document (collection = "journal_entries")
+@Table(name = "journal_entries")
 @Data
 @NoArgsConstructor
+@Entity
 public class JournalEntry {
 
     @Id
-    private ObjectId id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @NonNull
+    @Column(nullable = false)
     private String title;
 
     private LocalDateTime date;
 
-    private String  content;
+    @Column(columnDefinition = "TEXT")
+    private String content;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 }
+
+
