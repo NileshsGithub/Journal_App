@@ -2,7 +2,7 @@ package com.company.journalApp.service;
 
 import com.company.journalApp.entity.User;
 import com.company.journalApp.repository.UserRepository;
-import org.bson.types.ObjectId;
+import com.sun.jdi.request.DuplicateRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,9 +20,28 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public void saveNewUser(User user){
+    public User saveNewUser(User user){
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRoles(Arrays.asList("USER"));
+        User existingName = findByUserName(user.getUserName());
+        if(existingName != null){
+            throw new DuplicateRequestException(String.format("username %s already exist",user.getUserName()));
+        }
+        User savedUser = userRepository.save(user);
+        savedUser = mapToUser(savedUser);
+        return savedUser;
+    }
+
+    User mapToUser(User user){
+        User savedUser = new User();
+        savedUser.setUserName(user.getUserName());
+        savedUser.setUserId(user.getUserId());
+        return savedUser;
+    }
+
+    public void saveNewAdminUser(User user){
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRoles(Arrays.asList("USER","ADMIN"));
         userRepository.save(user);
     }
 
@@ -35,11 +54,11 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public Optional<User> findById(ObjectId id){
+    public Optional<User> findById(Long id){
     return userRepository.findById(id);
     }
 
-    public void deleteById(ObjectId id){
+    public void deleteById(Long id){
         userRepository.deleteById(id);
     }
 
