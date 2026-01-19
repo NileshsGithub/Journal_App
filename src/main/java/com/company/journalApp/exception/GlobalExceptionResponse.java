@@ -14,6 +14,6 @@ import java.time.LocalDateTime;
 public class GlobalExceptionResponse {
     private String userMessage;
     private String errorCode;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "sss-mm-yyyy hh-mm-ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-mm-yyyy hh-mm-ss")
     private LocalDateTime timeStamp;
 }

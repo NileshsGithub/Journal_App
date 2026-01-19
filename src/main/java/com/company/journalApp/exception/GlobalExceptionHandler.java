@@ -12,7 +12,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RecordNotFoundException.class)
     public ResponseEntity<GlobalExceptionResponse> handleRecordNotFoundException(RecordNotFoundException exception) {
-            GlobalExceptionResponse error = buildErrorDetails(CustomExceptionCodes.RESOURCE_NOT_FOUND.getCode(), exception.getMessage());
+            GlobalExceptionResponse error = buildErrorDetails(CustomExceptionCodes.RECORD_NOT_FOUND.getCode(), exception.getMessage());
             return buildResponseEntity(error, HttpStatus.CONFLICT);
     }
 
