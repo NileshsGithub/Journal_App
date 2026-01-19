@@ -4,6 +4,7 @@ import com.company.journalApp.DTO.JournalRequest;
 import com.company.journalApp.DTO.JournalResponse;
 import com.company.journalApp.entity.JournalEntry;
 import com.company.journalApp.entity.User;
+import com.company.journalApp.exception.RecordNotFoundException;
 import com.company.journalApp.repository.JournalEntryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -69,7 +70,7 @@ public class JournalEntryService    {
         User user = userService.findByUserName("testUser"); // testUser -> HardCoded user
         JournalEntry journalEntry = journalEntryRepository.findByIdAndUserId(id, user.getUserId());
         if(journalEntry == null){
-            throw new RuntimeException(String.format("Journal not found for id %d", id));
+            throw new RecordNotFoundException(String.format("Journal not found for id %d", id));
         }
         return mapToJournalResponse(journalEntry);
     }
