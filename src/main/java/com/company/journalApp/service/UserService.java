@@ -1,13 +1,17 @@
 package com.company.journalApp.service;
 
+import com.company.journalApp.DTO.JournalResponse;
+import com.company.journalApp.DTO.UserRequest;
+import com.company.journalApp.DTO.UserResponse;
+import com.company.journalApp.entity.JournalEntry;
 import com.company.journalApp.entity.User;
 import com.company.journalApp.repository.UserRepository;
-import com.sun.jdi.request.DuplicateRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,29 +24,27 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public User saveNewUser(User user){
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRoles(Arrays.asList("USER"));
+    public UserResponse createUser(UserRequest user) throws Exception {
+        if((user.getRole() != null && !user.getRole().isEmpty()) && user.getRole().equals("ADMIN")){
+            user.setRole("ADMIN");
+        }else {
+            user.setRole("USER");
+        }
         User existingName = findByUserName(user.getUserName());
         if(existingName != null){
-            throw new DuplicateRequestException(String.format("username %s already exist",user.getUserName()));
+            throw new Exception("username already exist");
         }
-        User savedUser = userRepository.save(user);
-        savedUser = mapToUser(savedUser);
-        return savedUser;
+        User response = new User();
+        response.setUserName(user.getUserName());
+        response.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(response);
+        return mapToUser(response);
     }
 
-    User mapToUser(User user){
-        User savedUser = new User();
-        savedUser.setUserName(user.getUserName());
-        savedUser.setUserId(user.getUserId());
-        return savedUser;
-    }
-
-    public void saveNewAdminUser(User user){
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRoles(Arrays.asList("USER","ADMIN"));
-        userRepository.save(user);
+    public UserResponse mapToUser(User user){
+        UserResponse response = new UserResponse();
+        response.setUserName(user.getUserName());
+        return response;
     }
 
     public void saveUser(User user){
@@ -54,9 +56,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public Optional<User> findById(Long id){
-    return userRepository.findById(id);
-    }
+
 
     public void deleteById(Long id){
         userRepository.deleteById(id);

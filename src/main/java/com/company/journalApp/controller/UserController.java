@@ -1,5 +1,7 @@
 package com.company.journalApp.controller;
 
+import com.company.journalApp.DTO.UserRequest;
+import com.company.journalApp.DTO.UserResponse;
 import com.company.journalApp.entity.User;
 import com.company.journalApp.repository.UserRepository;
 import com.company.journalApp.service.UserService;
@@ -7,11 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -24,6 +23,13 @@ public class UserController {
     private UserRepository userRepository;
 
 
+    @PostMapping("/create-user")
+    public ResponseEntity<UserResponse> createUser(@RequestBody UserRequest user) throws Exception {
+        UserResponse savedUser = userService.createUser(user);
+        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+    }
+
+
     @PutMapping
     public ResponseEntity<?> updateUser(@RequestBody User user) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -31,7 +37,7 @@ public class UserController {
         User userInDb = userService.findByUserName(userName);
         userInDb.setUserName(user.getUserName());
         userInDb.setPassword(user.getPassword());
-        userService.saveNewUser(userInDb);
+        userService.saveUser(userInDb);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

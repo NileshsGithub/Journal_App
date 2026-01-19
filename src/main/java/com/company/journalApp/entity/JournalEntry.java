@@ -24,9 +24,9 @@ public class JournalEntry {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    private Long userId;
+
+    private boolean isDeleted;
 }
 
 

@@ -1,11 +1,9 @@
 package com.company.journalApp.controller;
 
-import com.company.journalApp.entity.User;
 import com.company.journalApp.service.AdminService;
 import com.company.journalApp.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,8 +25,4 @@ public class AdminController {
         return adminService.getAllUsers();
     }
 
-    @PostMapping("/create")
-    public void createAdmin(User user){
-         userService.saveNewAdminUser(user);
-    }
 }
