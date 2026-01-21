@@ -16,6 +16,12 @@ public class GlobalExceptionHandler {
             return buildResponseEntity(error, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(InvalidInputException.class)
+    public ResponseEntity<GlobalExceptionResponse> handleInvalidInputException(InvalidInputException exception) {
+        GlobalExceptionResponse error = buildErrorDetails(CustomExceptionCodes.BAD_REQUEST.getCode(), exception.getMessage());
+        return buildResponseEntity(error, HttpStatus.BAD_REQUEST);
+    }
+
     public GlobalExceptionResponse buildErrorDetails(String errorCode, String errorMessage){
         return GlobalExceptionResponse.builder().errorCode(errorCode).userMessage(errorMessage).timeStamp(LocalDateTime.now()).build();
     }

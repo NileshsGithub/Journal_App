@@ -28,9 +28,11 @@ public class JournalEntryController {
     }
 
 
-    @GetMapping("userid/{userId}")
-    public ResponseEntity<List<JournalResponse>> getAllJournalsByUserId(@PathVariable Long userId) {
-        List<JournalResponse> list = journalEntryService.getAllJournalsByUserId(userId);
+    @GetMapping("/all")
+    public ResponseEntity<List<JournalResponse>> getAllJournalsByUserId(@RequestParam(value = "userid",required = true) Long userId,
+                                                                        @RequestParam(value = "page", defaultValue = "0") int page,
+                                                                        @RequestParam(value = "pageSize", defaultValue = "100") int pageSize) {
+        List<JournalResponse> list = journalEntryService.getAllJournalsByUserId(userId, page, pageSize);
         return new ResponseEntity<List<JournalResponse>>(list, HttpStatus.OK);
     }
 

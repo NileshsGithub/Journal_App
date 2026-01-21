@@ -4,9 +4,15 @@ import com.company.journalApp.DTO.JournalRequest;
 import com.company.journalApp.DTO.JournalResponse;
 import com.company.journalApp.entity.JournalEntry;
 import com.company.journalApp.entity.User;
+import com.company.journalApp.exception.InvalidInputException;
 import com.company.journalApp.exception.RecordNotFoundException;
 import com.company.journalApp.repository.JournalEntryRepository;
+import jakarta.validation.Valid;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -28,25 +34,20 @@ public class JournalEntryService    {
 
 
     @Transactional
-    public JournalResponse createJournalEntry(JournalRequest request){
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String userName = authentication.getName();
-            User user = userService.findByUserName("testUser"); // testUser -> HardCoded user
+    public JournalResponse createJournalEntry(@Valid JournalRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
+        User user = userService.findByUserName("testUser"); // testUser -> HardCoded user
 
-            JournalEntry entry = new JournalEntry();
-            entry.setDate(LocalDateTime.now());
-            entry.setTitle(request.getTitle());
-            entry.setContent(request.getContent());
-            entry.setUserId(user.getUserId());
-            entry.setDeleted(false);
+        JournalEntry entry = new JournalEntry();
+        entry.setDate(LocalDateTime.now());
+        entry.setTitle(request.getTitle());
+        entry.setContent(request.getContent());
+        entry.setUserId(user.getUserId());
+        entry.setDeleted(false);
 
-            JournalEntry journal = journalEntryRepository.save(entry);
-            return mapToJournalResponse(journal);
-
-        } catch (Exception e){
-            throw new RuntimeException("An error occurred while saving the entry");
-        }
+        JournalEntry journal = journalEntryRepository.save(entry);
+        return mapToJournalResponse(journal);
     }
 
     private JournalResponse mapToJournalResponse(JournalEntry journal) {
@@ -57,10 +58,11 @@ public class JournalEntryService    {
         return response;
     }
 
-    public List<JournalResponse> getAllJournalsByUserId(Long id){
+    public List<JournalResponse> getAllJournalsByUserId(Long userId, int page, int size){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userName = authentication.getName();
-        List<JournalEntry> journalResponses = journalEntryRepository.findByUserIdAndIsDeletedFalse(id);
+        Pageable pageable = PageRequest.of(page,size);
+        List<JournalEntry> journalResponses = journalEntryRepository.findByUserIdAndIsDeletedFalse(userId,pageable);
         return journalResponses.stream().map(this::mapToJournalResponse).collect(Collectors.toList());
     }
 
@@ -76,7 +78,7 @@ public class JournalEntryService    {
     }
 
 
-    public JournalResponse updateJournalById(JournalRequest request) throws Exception {
+    public JournalResponse updateJournalById(@Valid JournalRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userName = authentication.getName();
         User user = userService.findByUserName("testUser"); // testUser -> HardCoded user
@@ -92,11 +94,11 @@ public class JournalEntryService    {
             journalEntryRepository.save(oldEntry.get());
             return mapToJournalResponse(oldEntry.get());
         }else {
-            throw new Exception();
+            throw new RecordNotFoundException(String.format("Journal not found for id %d", request.getJournalId()));
         }
     }
 
-    public Long deleteJournalById(Long id) throws Exception {
+    public Long deleteJournalById(Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         User user = userService.findByUserName("testUser"); // testUser -> HardCoded user
@@ -110,7 +112,7 @@ public class JournalEntryService    {
            journalEntryRepository.save(oldEntry.get());
            return id;
         }else {
-            throw new Exception();
+            throw new RecordNotFoundException(String.format("Journal not found for id %d", id));
         }
     }
 }
