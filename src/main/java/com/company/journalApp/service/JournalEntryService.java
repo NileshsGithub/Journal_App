@@ -1,18 +1,18 @@
 package com.company.journalApp.service;
 
+import com.company.journalApp.DTO.ApiResponse;
 import com.company.journalApp.DTO.JournalRequest;
 import com.company.journalApp.DTO.JournalResponse;
 import com.company.journalApp.entity.JournalEntry;
 import com.company.journalApp.entity.User;
-import com.company.journalApp.exception.InvalidInputException;
 import com.company.journalApp.exception.RecordNotFoundException;
 import com.company.journalApp.repository.JournalEntryRepository;
+import com.company.journalApp.repository.specification.JournalEntrySpecification;
 import jakarta.validation.Valid;
-import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -26,11 +26,15 @@ import java.util.stream.Collectors;
 @Service
 public class JournalEntryService    {
 
-    @Autowired
     private JournalEntryRepository journalEntryRepository;
 
-    @Autowired
     private UserService userService;
+
+
+    public JournalEntryService(JournalEntryRepository journalEntryRepository, UserService userService) {
+        this.journalEntryRepository = journalEntryRepository;
+        this.userService = userService;
+    }
 
 
     @Transactional
@@ -58,13 +62,18 @@ public class JournalEntryService    {
         return response;
     }
 
-    public List<JournalResponse> getAllJournalsByUserId(Long userId, int page, int size){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userName = authentication.getName();
+    public ApiResponse<JournalResponse> getAllJournalsByUserId(Long userId, int page, int size){
         Pageable pageable = PageRequest.of(page,size);
-        List<JournalEntry> journalResponses = journalEntryRepository.findByUserIdAndIsDeletedFalse(userId,pageable);
-        return journalResponses.stream().map(this::mapToJournalResponse).collect(Collectors.toList());
-    }
+        Page<JournalEntry> response = journalEntryRepository.findByUserIdAndIsDeletedFalse(userId,pageable);
+        List<JournalResponse> responseData = response.stream().map(this::mapToJournalResponse).collect(Collectors.toList());
+        return new ApiResponse<>(response.getTotalPages(), response.getTotalElements(), response.getNumber(), response.getSize(), responseData);
+        }
+
+        public ApiResponse<JournalResponse> getAllJournals(Long userId, String title, String content, String startDate, String endDate, int page, int pageSize){
+            Page<JournalEntry> journalsPage = journalEntryRepository.findAll(JournalEntrySpecification.getJournalEnrtySpecification(userId, title, content, startDate, endDate), PageRequest.of(page, pageSize, Sort.by("modifiedBy")));
+            List<JournalResponse> responses = journalsPage.stream().map(this::mapToJournalResponse).collect(Collectors.toList());
+            return new ApiResponse<>(journalsPage.getTotalPages(), journalsPage.getTotalElements(), journalsPage.getNumber(), journalsPage.getSize(), responses);
+        }
 
     public JournalResponse getJournalById(Long id){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
