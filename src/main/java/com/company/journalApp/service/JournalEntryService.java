@@ -70,7 +70,7 @@ public class JournalEntryService    {
         }
 
         public ApiResponse<JournalResponse> getAllJournals(Long userId, String title, String content, String startDate, String endDate, int page, int pageSize){
-            Page<JournalEntry> journalsPage = journalEntryRepository.findAll(JournalEntrySpecification.getJournalEnrtySpecification(userId, title, content, startDate, endDate), PageRequest.of(page, pageSize, Sort.by("modifiedBy")));
+            Page<JournalEntry> journalsPage = journalEntryRepository.findAll(JournalEntrySpecification.getJournalEnrtySpecification(userId, title, content, startDate, endDate), PageRequest.of(page, pageSize, Sort.by("id")));
             List<JournalResponse> responses = journalsPage.stream().map(this::mapToJournalResponse).collect(Collectors.toList());
             return new ApiResponse<>(journalsPage.getTotalPages(), journalsPage.getTotalElements(), journalsPage.getNumber(), journalsPage.getSize(), responses);
         }

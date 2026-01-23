@@ -21,9 +21,26 @@ public class JournalEntrySpecification {
         return ((root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            Optional.ofNullable(userId).ifPresent(ui -> predicates.add(criteriaBuilder.equal(root.get("userId"),ui)));
-            Optional.ofNullable(title).ifPresent(t->predicates.add(criteriaBuilder.equal(root.get("title"),t)));
-            Optional.ofNullable(contentKeyword).ifPresent(t->predicates.add(criteriaBuilder.equal(root.get("content"),t)));
+            predicates.add(criteriaBuilder.equal(root.get("userId"), userId));
+            predicates.add(criteriaBuilder.isFalse(root.get("isDeleted")));
+            if (title != null && !title.isBlank()) {
+                predicates.add(
+                        criteriaBuilder.like(
+                                criteriaBuilder.lower(root.get("title")),
+                                "%" + title.toLowerCase() + "%"
+                        )
+                );
+            }
+
+            // 🔍 CONTENT KEYWORD CONTAINS (CASE-INSENSITIVE)
+            if (contentKeyword != null && !contentKeyword.isBlank()) {
+                predicates.add(
+                        criteriaBuilder.like(
+                                criteriaBuilder.lower(root.get("content")),
+                                "%" + contentKeyword.toLowerCase() + "%"
+                        )
+                );
+            }
 
             if(startDate != null && endDate != null){
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyy");
@@ -35,10 +52,8 @@ public class JournalEntrySpecification {
 
                 predicates.add(criteriaBuilder.between(root.get("createdOn"), startDate, endDate));
             }
-            Predicate predicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-            query.where(predicate);
 
-            return root.get("id").in(query);
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         });
     }
 }
