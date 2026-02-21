@@ -32,7 +32,7 @@ public class JournalEntrySpecification {
                 );
             }
 
-            // 🔍 CONTENT KEYWORD CONTAINS (CASE-INSENSITIVE)
+
             if (contentKeyword != null && !contentKeyword.isBlank()) {
                 predicates.add(
                         criteriaBuilder.like(
