@@ -37,7 +37,9 @@ public class SpringSecurityConfig{
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll())
+                        .requestMatchers("/public/**", "/user/create-user").permitAll()
+                        .anyRequest().authenticated())
+                .httpBasic(Customizer.withDefaults())
                 .build();
     }
 

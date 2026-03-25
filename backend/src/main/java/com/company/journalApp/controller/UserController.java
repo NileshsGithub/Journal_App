@@ -5,7 +5,6 @@ import com.company.journalApp.DTO.UserResponse;
 import com.company.journalApp.entity.User;
 import com.company.journalApp.repository.UserRepository;
 import com.company.journalApp.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -16,12 +15,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/user")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
+    public UserController(UserService userService, UserRepository userRepository) {
+        this.userService = userService;
+        this.userRepository = userRepository;
+    }
 
     @PostMapping("/create-user")
     public ResponseEntity<UserResponse> createUser(@RequestBody UserRequest user) throws Exception {

@@ -1,28 +1,24 @@
 package com.company.journalApp.service;
 
-import com.company.journalApp.DTO.JournalResponse;
 import com.company.journalApp.DTO.UserRequest;
 import com.company.journalApp.DTO.UserResponse;
-import com.company.journalApp.entity.JournalEntry;
 import com.company.journalApp.entity.User;
 import com.company.journalApp.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public UserResponse createUser(UserRequest user) throws Exception {
         if((user.getRole() != null && !user.getRole().isEmpty()) && user.getRole().equals("ADMIN")){
@@ -37,6 +33,7 @@ public class UserService {
         User response = new User();
         response.setUserName(user.getUserName());
         response.setPassword(passwordEncoder.encode(user.getPassword()));
+        response.setRole(user.getRole());
         userRepository.save(response);
         return mapToUser(response);
     }

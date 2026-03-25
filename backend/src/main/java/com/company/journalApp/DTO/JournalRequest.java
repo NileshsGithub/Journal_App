@@ -20,4 +20,5 @@ public class JournalRequest {
     @NotBlank(message = "Content cannot be null or empty")
     @Size(max = 1000, message = "Content cannot be more than 1000 characters")
     private String content;
+
 }

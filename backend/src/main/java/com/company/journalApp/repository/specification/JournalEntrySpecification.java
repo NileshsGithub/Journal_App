@@ -21,7 +21,9 @@ public class JournalEntrySpecification {
         return ((root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            predicates.add(criteriaBuilder.equal(root.get("userId"), userId));
+            if (userId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("userId"), userId));
+            }
             predicates.add(criteriaBuilder.isFalse(root.get("isDeleted")));
             if (title != null && !title.isBlank()) {
                 predicates.add(
